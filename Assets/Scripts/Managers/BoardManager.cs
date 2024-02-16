@@ -64,4 +64,18 @@ public class BoardManager : MonoBehaviour
         float result = firstTerm * Mathf.Pow(commonRatio, index);
         return result;
     }
+
+    public bool IsCurrentValueEqualToGeometricNumber(int currentValue)
+    {
+        for (int i = 0; i < numberOfTerms; i++)
+        {
+            if (currentValue == Mathf.RoundToInt(CalculateGeometricNumber(i)))
+            {
+                return true;
+                break;
+            }
+        }
+
+        return false;
+    }
 }

@@ -68,11 +68,8 @@ public class Node : MonoBehaviour
         UnselectNode();
         isDragging = false;
         CheckForMerge(connectedNodes);
+        GameManager.Instance.SetCurrentBonusText(0);
 
-        // foreach (Node activeNode in BoardManager.Instance.activeNodes)
-        // {
-        //     activeNode.CheckIfGridBelowIsEmpty();
-        // }
     }
 
     public void UnselectNode()
@@ -87,14 +84,18 @@ public class Node : MonoBehaviour
         Vector2 belowNeighborPosition = transform.position + ((Vector3)Vector2.down * BoardManager.Instance.nodeOffset);
         RaycastHit2D hit = Physics2D.Raycast(belowNeighborPosition, Vector2.zero);
 
-        if (hit.collider == null)
+        if (hit.collider != null || transform.position.y == 0)
         {
-            Debug.Log("Neighbor spot of: "+ gameObject.name + " is empty!!");
+            return;
         }
-        else
+        Debug.Log("Neighbor spot of: "+ gameObject.name + " is empty!!");
+        transform.DOMove(transform.position + (Vector3.down * BoardManager.Instance.nodeOffset), 0.25f).OnComplete(() =>
         {
-            Debug.Log("Neighbor spot of: "+ gameObject.name + " is full!!");
-        }
+            foreach (Node activeNode in BoardManager.Instance.activeNodes)
+            {
+                activeNode.CheckIfGridBelowIsEmpty();
+            }
+        });
     }
     private void OnContinueDrag()
     {
@@ -109,7 +110,45 @@ public class Node : MonoBehaviour
                 AddNodeToList(targetNode);
                 targetNode.SelectNode();
             }
+            
+            Debug.Log("Is target Node Neighbor: " + IsTargetNodeNeighbor(targetNode));
         }
+    }
+
+    private bool IsTargetNodeNeighbor(Node targetNode)
+    {
+        Vector2[] directions =
+        {
+            Vector2.up * BoardManager.Instance.nodeOffset, 
+            Vector2.down * BoardManager.Instance.nodeOffset,
+            Vector2.left * BoardManager.Instance.nodeOffset, 
+            Vector2.right * BoardManager.Instance.nodeOffset,
+            new Vector2(-1, 1) * BoardManager.Instance.nodeOffset,
+            new Vector2(1, 1) * BoardManager.Instance.nodeOffset,
+            new Vector2(-1, -1) * BoardManager.Instance.nodeOffset,
+            new Vector2(1, -1) * BoardManager.Instance.nodeOffset
+        };
+
+        foreach (Vector2 direction in directions)
+        {
+            // Calculate the position of the neighbor
+            Vector2 neighborPosition = transform.position + (Vector3)direction;
+
+
+            // Raycast to check if there's a pop at the neighbor position
+            RaycastHit2D hit = Physics2D.Raycast(neighborPosition, Vector2.zero);
+            
+            if (hit.collider != null)
+            {
+                Node neighborNode = hit.collider.GetComponent<Node>();
+                if (targetNode == neighborNode)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private void AddNodeToList(Node targetNode)
@@ -120,6 +159,12 @@ public class Node : MonoBehaviour
         }
 
         connectedNodes.Add(targetNode);
+        
+        int currentNodeValue = nodeValue * (connectedNodes.Count + 1);
+        if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
+        {
+            GameManager.Instance.SetCurrentBonusText(currentNodeValue);
+        }
     }
 
     void CheckForMerge(List<Node> nodesToMerge)
@@ -160,8 +205,19 @@ public class Node : MonoBehaviour
         {
             LeanPool.Despawn(nodesToMerge[^1].gameObject);
             LeanPool.Despawn(gameObject);
+            
+            foreach (Node activeNode in BoardManager.Instance.activeNodes)
+            {
+                if (activeNode.transform.position.y == 0)
+                {
+                    continue;
+                }
+                activeNode.CheckIfGridBelowIsEmpty();
+            }
+            
+            connectedNodes.Clear();
+
         }));
-        connectedNodes.Clear();
     }
 
     [Button]
