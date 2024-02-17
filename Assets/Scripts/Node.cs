@@ -23,6 +23,9 @@ public class Node : MonoBehaviour
     private Vector3 normalScale;
 
     private int connectValue;
+
+    private Node currentConnectedNode;
+    
     
     #region Line Renderer Variables
     private Gradient gradient;
@@ -34,6 +37,7 @@ public class Node : MonoBehaviour
         isDragging = false;
         isMerged = false;
         isSelected = false;
+        currentConnectedNode = null;
         
         nodeValue = value;
         numberText.SetText(nodeValue.ToString());
@@ -91,6 +95,7 @@ public class Node : MonoBehaviour
         SelectNode();
         BoardManager.Instance.GenerateLine(transform, gradient);
         isDragging = true;
+        currentConnectedNode = this;
     }
 
     public void SelectNode()
@@ -139,10 +144,11 @@ public class Node : MonoBehaviour
         {
             Node targetNode = hit.collider.GetComponent<Node>();
 
-            if (targetNode != null && !targetNode.isSelected && targetNode.nodeValue == nodeValue)
+            if (targetNode != null && !targetNode.isSelected && targetNode.nodeValue == nodeValue && IsTargetNodeNeighbor(targetNode))
             {
                 AddNodeToList(targetNode);
                 targetNode.SelectNode();
+                currentConnectedNode = targetNode;
                 BoardManager.Instance.GenerateLine(targetNode.transform,gradient);
             }
             
@@ -165,13 +171,9 @@ public class Node : MonoBehaviour
 
         foreach (Vector2 direction in directions)
         {
-            // Calculate the position of the neighbor
-            Vector2 neighborPosition = transform.position + (Vector3)direction;
-
-
-            // Raycast to check if there's a pop at the neighbor position
+            Vector2 neighborPosition = currentConnectedNode.transform.position + (Vector3)direction;
             RaycastHit2D hit = Physics2D.Raycast(neighborPosition, Vector2.zero);
-            
+
             if (hit.collider != null)
             {
                 Node neighborNode = hit.collider.GetComponent<Node>();
