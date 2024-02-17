@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Lean.Pool;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -65,6 +66,29 @@ public class BoardManager : MonoBehaviour
         return result;
     }
 
+    [Button]
+    public void MoveNodesDown()
+    {
+        StartCoroutine(MoveNodesDownCO());
+    }
+
+    private IEnumerator MoveNodesDownCO()
+    {
+        for (int i = 0; i < columns; i++)
+        {
+            foreach (Node activeNode in activeNodes)
+            {
+                if (activeNode.transform.position.y <= 0)
+                {
+                    continue;
+                }
+                activeNode.CheckIfGridBelowIsEmpty();
+            }
+
+            yield return new WaitForSeconds(0.3f);
+        }
+    }
+    
     public bool IsCurrentValueEqualToGeometricNumber(int currentValue)
     {
         for (int i = 0; i < numberOfTerms; i++)

@@ -84,19 +84,17 @@ public class Node : MonoBehaviour
         Vector2 belowNeighborPosition = transform.position + ((Vector3)Vector2.down * BoardManager.Instance.nodeOffset);
         RaycastHit2D hit = Physics2D.Raycast(belowNeighborPosition, Vector2.zero);
 
-        if (hit.collider != null || transform.position.y == 0)
+        if (hit.collider != null || transform.position.y <= 0)
         {
             return;
         }
-        Debug.Log("Neighbor spot of: "+ gameObject.name + " is empty!!");
-        transform.DOMove(transform.position + (Vector3.down * BoardManager.Instance.nodeOffset), 0.25f).OnComplete(() =>
-        {
-            foreach (Node activeNode in BoardManager.Instance.activeNodes)
-            {
-                activeNode.CheckIfGridBelowIsEmpty();
-            }
-        });
+        Debug.Log("Neighbor spot of: " + gameObject.name + " is empty!!");
+        Debug.Log("Current Y position of: " + gameObject.name + " is: " + transform.position.y);
+        transform.DOKill(true);
+        transform.DOMove(transform.position + (Vector3)(Vector2.down * BoardManager.Instance.nodeOffset), 0.25f);
+
     }
+
     private void OnContinueDrag()
     {
         RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
@@ -206,15 +204,7 @@ public class Node : MonoBehaviour
             LeanPool.Despawn(nodesToMerge[^1].gameObject);
             LeanPool.Despawn(gameObject);
             
-            foreach (Node activeNode in BoardManager.Instance.activeNodes)
-            {
-                if (activeNode.transform.position.y == 0)
-                {
-                    continue;
-                }
-                activeNode.CheckIfGridBelowIsEmpty();
-            }
-            
+            BoardManager.Instance.MoveNodesDown();
             connectedNodes.Clear();
 
         }));

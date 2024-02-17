@@ -365,7 +365,7 @@ MonoBehaviour:
   columns: 5
   firstTerm: 2
   commonRatio: 2
-  numberOfTerms: 5
+  numberOfTerms: 2
   activeNodes: []
 --- !u!1 &1362564102
 GameObject:
