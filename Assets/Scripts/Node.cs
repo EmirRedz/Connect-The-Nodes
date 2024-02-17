@@ -11,7 +11,6 @@ using Random = UnityEngine.Random;
 public class Node : MonoBehaviour
 {
     [SerializeField] private TMP_Text numberText;
-    [SerializeField] private List<Color> nodeColor;
     [SerializeField] private SpriteRenderer sr;
     public int nodeValue;
     public bool isSelected ;
@@ -22,14 +21,51 @@ public class Node : MonoBehaviour
   
     private Vector3 selectedScale;
     private Vector3 normalScale;
-    public void Init(int value, int termIndex)
+
+    private int connectValue;
+    
+    #region Line Renderer Variables
+    private Gradient gradient;
+    private GradientColorKey[] colorKeys;
+    private GradientAlphaKey[] alphaKeys;
+    #endregion
+    public void Init(int value, Color colorToSet)
     {
+        isDragging = false;
+        isMerged = false;
+        isSelected = false;
+        
         nodeValue = value;
         numberText.SetText(nodeValue.ToString());
         normalScale = transform.localScale;
         selectedScale = transform.localScale * 1.2f;
 
-        sr.color = nodeColor[termIndex];
+        sr.color = colorToSet;
+
+        #region Line Renderer Color Set Up
+
+        gradient = new Gradient();
+        colorKeys = new GradientColorKey[2];
+        alphaKeys = new GradientAlphaKey[2];
+
+        colorKeys[0].color = sr.color;
+        colorKeys[0].time = 0.0f;
+        alphaKeys[0].alpha = sr.color.a;
+        alphaKeys[0].time = 0.0f;
+
+        colorKeys[1].color = sr.color;
+        colorKeys[1].time = 1.0f;
+        alphaKeys[1].alpha = sr.color.a;
+        alphaKeys[1].time = 1.0f;
+
+        gradient.SetKeys(colorKeys, alphaKeys);
+
+        for (float t = 0.0f; t <= 1.0f; t += 1.0f / 2)
+        {
+            Color interpolatedColor = gradient.Evaluate(t);
+        }
+
+        #endregion
     }
 
     private void OnMouseDown()
@@ -53,6 +89,7 @@ public class Node : MonoBehaviour
     private void StartDrag()
     {
         SelectNode();
+        BoardManager.Instance.GenerateLine(transform, gradient);
         isDragging = true;
     }
 
@@ -69,6 +106,7 @@ public class Node : MonoBehaviour
         isDragging = false;
         CheckForMerge(connectedNodes);
         GameManager.Instance.SetCurrentBonusText(0);
+        BoardManager.Instance.ClearLineRenderer();
 
     }
 
@@ -88,8 +126,6 @@ public class Node : MonoBehaviour
         {
             return;
         }
-        Debug.Log("Neighbor spot of: " + gameObject.name + " is empty!!");
-        Debug.Log("Current Y position of: " + gameObject.name + " is: " + transform.position.y);
         transform.DOKill(true);
         transform.DOMove(transform.position + (Vector3)(Vector2.down * BoardManager.Instance.nodeOffset), 0.25f);
 
@@ -107,9 +143,9 @@ public class Node : MonoBehaviour
             {
                 AddNodeToList(targetNode);
                 targetNode.SelectNode();
+                BoardManager.Instance.GenerateLine(targetNode.transform,gradient);
             }
             
-            Debug.Log("Is target Node Neighbor: " + IsTargetNodeNeighbor(targetNode));
         }
     }
 
@@ -159,9 +195,12 @@ public class Node : MonoBehaviour
         connectedNodes.Add(targetNode);
         
         int currentNodeValue = nodeValue * (connectedNodes.Count + 1);
+        
+        Debug.Log("Current node value:"  + currentNodeValue);
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
-            GameManager.Instance.SetCurrentBonusText(currentNodeValue);
+            connectValue = currentNodeValue;
+            GameManager.Instance.SetCurrentBonusText(connectValue);
         }
     }
 
@@ -199,25 +238,18 @@ public class Node : MonoBehaviour
 
         }
 
-        transform.DOMove(nodesToMerge[^1].transform.position, 0.75f).SetEase(Ease.Linear).OnComplete((() =>
+        transform.DOMove(nodesToMerge[^1].transform.position, 0.75f).SetEase(Ease.Linear);
+
+        DOVirtual.DelayedCall(1f, () =>
         {
-            LeanPool.Despawn(nodesToMerge[^1].gameObject);
             LeanPool.Despawn(gameObject);
             
             BoardManager.Instance.MoveNodesDown();
+            
+            nodesToMerge[^1].Init(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
             connectedNodes.Clear();
 
-        }));
+        });
     }
-
-    [Button]
-    private void SetAlpha()
-    {
-        for (int i = 0; i < nodeColor.Count; i++)
-        {
-            var color = nodeColor[i];
-            color.a = 1;
-            nodeColor[i] = color;
-        }
-    }
+    
 }
