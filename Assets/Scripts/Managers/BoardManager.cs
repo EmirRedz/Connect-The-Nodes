@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Lean.Pool;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -23,6 +24,7 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private int maxNumberOfTerms;
     [SerializeField] private int numberOfTerms = 5;
     [SerializeField] private List<Color> nodeColors;
+    private Node[,] grid = new Node[0,0];
     private int termIndex;
 
     public List<Node> activeNodes;
@@ -30,7 +32,7 @@ public class BoardManager : MonoBehaviour
     private LineRenderer lr;
     private List<Transform> points = new List<Transform>();
     private Transform lastPoint;
-
+    
     private void Awake()
     {
         Instance = this;
@@ -44,27 +46,55 @@ public class BoardManager : MonoBehaviour
 
     private void GenerateNodes()
     {
+        grid = new Node[rows, columns];
+        
         for (int i = 0; i < rows; i++)
         {
             for (int j = 0; j < columns; j++)
             {
                 Vector2 position = new Vector2(i * nodeOffset, j * nodeOffset);
-
-                // GameObject nodeHolder = new GameObject("Node Holder " + i + "," + j);
-                // nodeHolder.transform.SetParent(nodeContainer);
-                // nodeHolder.transform.localPosition = position;
-
-                var node = LeanPool.Spawn(nodePrefab, nodeContainer);
-                node.transform.localPosition = position;
-
-                int randomTermIndex = Random.Range(0, numberOfTerms);
-                //int randomTermIndex = Random.Range(numberOfTerms,maxNumberOfTerms);
-                int geomatricNumber = Mathf.RoundToInt(CalculateGeometricNumber(randomTermIndex));
-                node.Init(geomatricNumber, nodeColors[randomTermIndex]);
+        
+                var node = SpawnNode(position);
+        
                 node.name = "Node " + i + "," + j;
-                activeNodes.Add(node);
             }
         }
+    }
+
+    private Node SpawnNode(Vector2 position)
+    {
+        var node = LeanPool.Spawn(nodePrefab, nodeContainer);
+        node.transform.localPosition = position;
+
+        int randomTermIndex = Random.Range(0, numberOfTerms);
+        //int randomTermIndex = Random.Range(numberOfTerms,maxNumberOfTerms);
+        int geomatricNumber = Mathf.RoundToInt(CalculateGeometricNumber(randomTermIndex));
+        node.Init(geomatricNumber, nodeColors[randomTermIndex]);
+        activeNodes.Add(node);
+        
+        var rowIndex = Mathf.Clamp((int)position.x / nodeOffset, 0, rows - 1);
+        var colIndex = Mathf.Clamp((int)position.y / nodeOffset, 0, columns - 1);
+        
+        grid[(int)rowIndex, (int)colIndex] = node;
+        return node;
+    }
+    
+    List<Vector3> FindEmptyPositions()
+    {
+        List<Vector3> emptyPositions = new List<Vector3>();
+
+        for (int row = 0; row < rows-1; row++)
+        {
+            for (int col = 0; col < columns-1; col++)
+            {
+                if (grid[row, col] == null)
+                {
+                    emptyPositions.Add(new Vector3(col, row));
+                }
+            }
+        }
+
+        return emptyPositions;
     }
 
     float CalculateGeometricNumber(int index)
@@ -94,6 +124,15 @@ public class BoardManager : MonoBehaviour
             }
 
             yield return new WaitForSeconds(0.3f);
+        }
+
+
+        var emptyPositions = FindEmptyPositions();
+        emptyPositions.Sort((v1, v2) => v1.y.CompareTo(v2.y));
+        for (int i = 0; i < emptyPositions.Count; i++)
+        {
+            var node = SpawnNode(emptyPositions[i] + Vector3.up * 3);
+            node.transform.DOMove(emptyPositions[i], 0.75f).SetEase(Ease.Linear);
         }
     }
 
