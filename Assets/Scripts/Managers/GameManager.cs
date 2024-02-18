@@ -18,6 +18,11 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    private void Start()
+    {
+        SetCurrentBonusText(0, Color.clear);
+    }
+
     public void SetCurrentBonusText(int currentBonus, Color currentBonusColor)
     {
         if (currentBonus <= 0)
