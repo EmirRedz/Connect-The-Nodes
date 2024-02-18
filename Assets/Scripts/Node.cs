@@ -253,5 +253,4 @@ public class Node : MonoBehaviour
 
         });
     }
-    
 }

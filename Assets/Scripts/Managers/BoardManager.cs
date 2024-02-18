@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using Lean.Pool;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -31,6 +32,7 @@ public class BoardManager : MonoBehaviour
     private List<Transform> points = new List<Transform>();
     private Transform lastPoint;
 
+
     private void Awake()
     {
         Instance = this;
@@ -50,21 +52,24 @@ public class BoardManager : MonoBehaviour
             {
                 Vector2 position = new Vector2(i * nodeOffset, j * nodeOffset);
 
-                // GameObject nodeHolder = new GameObject("Node Holder " + i + "," + j);
-                // nodeHolder.transform.SetParent(nodeContainer);
-                // nodeHolder.transform.localPosition = position;
+                var node = SpawnNode(position);
 
-                var node = LeanPool.Spawn(nodePrefab, nodeContainer);
-                node.transform.localPosition = position;
-
-                int randomTermIndex = Random.Range(0, numberOfTerms);
-                //int randomTermIndex = Random.Range(numberOfTerms,maxNumberOfTerms);
-                int geomatricNumber = Mathf.RoundToInt(CalculateGeometricNumber(randomTermIndex));
-                node.Init(geomatricNumber, nodeColors[randomTermIndex]);
                 node.name = "Node " + i + "," + j;
-                activeNodes.Add(node);
             }
         }
+    }
+
+    private Node SpawnNode(Vector2 position)
+    {
+        var node = LeanPool.Spawn(nodePrefab, nodeContainer);
+        node.transform.localPosition = position;
+
+        int randomTermIndex = Random.Range(0, numberOfTerms);
+        //int randomTermIndex = Random.Range(numberOfTerms,maxNumberOfTerms);
+        int geomatricNumber = Mathf.RoundToInt(CalculateGeometricNumber(randomTermIndex));
+        node.Init(geomatricNumber, nodeColors[randomTermIndex]);
+        activeNodes.Add(node);
+        return node;
     }
 
     float CalculateGeometricNumber(int index)
@@ -95,6 +100,37 @@ public class BoardManager : MonoBehaviour
 
             yield return new WaitForSeconds(0.3f);
         }
+        
+        var emptyPositions = FindEmptyPositions();
+        emptyPositions.Sort((v1, v2) => v1.y.CompareTo(v2.y));
+
+        foreach (Vector2 emptyPosition in emptyPositions)
+        {
+            var node = SpawnNode(emptyPosition);
+            node.transform.localScale = Vector3.zero;
+            node.transform.DOScale(nodePrefab.transform.localScale, 0.35f);
+        }
+    }
+    
+    private List<Vector2> FindEmptyPositions()
+    {
+        List<Vector2> emptyPositions = new List<Vector2>();
+
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                Vector2 position = new Vector2(i * nodeOffset, j * nodeOffset);
+
+                var colliders = Physics2D.OverlapCircleAll(position, 0.35f);
+                if (colliders.Length <= 0)
+                {
+                    emptyPositions.Add(position);
+                }
+            }
+        }
+
+        return emptyPositions;
     }
 
     public bool IsCurrentValueEqualToGeometricNumber(int currentValue)

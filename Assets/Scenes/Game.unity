@@ -381,6 +381,8 @@ MonoBehaviour:
   - {r: 0.13725491, g: 0.47058827, b: 0.45098042, a: 1}
   - {r: 0.18039216, g: 0.18039216, b: 0.18039216, a: 1}
   activeNodes: []
+  allNodes: []
+  emptyPositions: []
 --- !u!120 &1280458954
 LineRenderer:
   m_ObjectHideFlags: 0
