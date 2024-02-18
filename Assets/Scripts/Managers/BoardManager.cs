@@ -84,33 +84,52 @@ public class BoardManager : MonoBehaviour
     {
         StartCoroutine(MoveNodesDownCO());
     }
+    
+    private Node GetNodeAt(int row, int col)
+    {
+        return activeNodes.Find(nodeTransform => Mathf.RoundToInt(nodeTransform.transform.position.y / nodeOffset) == row && Mathf.RoundToInt(nodeTransform.transform.position.x / nodeOffset) == col);
+    }
+    
+    private void MoveNode(Node node, int newRow, int col)
+    {
+        Vector3 newPosition = new Vector3(col * nodeOffset, newRow * nodeOffset, 0);
+        
+        node.transform.DOMove(newPosition, 0.05f).SetEase(Ease.Linear);
+    }
 
     private IEnumerator MoveNodesDownCO()
     {
-        for (int i = 0; i < columns; i++)
+        for (int col = 0; col < columns; col++)
         {
-            foreach (Node activeNode in activeNodes)
+            int emptySpaces = 0;
+
+            for (int row = 0; row < rows; row++)
             {
-                if (activeNode.transform.position.y <= 0)
+                var currentNode = GetNodeAt(row, col);
+
+                if (currentNode == null)
                 {
-                    continue;
+                    emptySpaces++;
                 }
-
-                activeNode.CheckIfGridBelowIsEmpty();
+                else if (emptySpaces > 0)
+                {
+                    MoveNode(currentNode, row - emptySpaces, col);
+                }
             }
-
-            yield return new WaitForSeconds(0.3f);
         }
+
+        yield return new WaitForSeconds(0.1f);
         
         var emptyPositions = FindEmptyPositions();
         emptyPositions.Sort((v1, v2) => v1.y.CompareTo(v2.y));
-
+        
         foreach (Vector2 emptyPosition in emptyPositions)
         {
             var node = SpawnNode(emptyPosition);
             node.transform.localScale = Vector3.zero;
             node.transform.DOScale(nodePrefab.transform.localScale, 0.06f);
         }
+        
     }
     
     private List<Vector2> FindEmptyPositions()

@@ -111,7 +111,7 @@ public class Node : MonoBehaviour
         UnselectNode();
         isDragging = false;
         CheckForMerge(connectedNodes);
-        GameManager.Instance.SetCurrentBonusText(0);
+        GameManager.Instance.SetCurrentBonusText(0, Color.clear);
         BoardManager.Instance.ClearLineRenderer();
 
     }
@@ -203,7 +203,7 @@ public class Node : MonoBehaviour
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
             connectValue = currentNodeValue;
-            GameManager.Instance.SetCurrentBonusText(connectValue);
+            GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
         }
     }
 
@@ -211,11 +211,11 @@ public class Node : MonoBehaviour
     {
         if (nodesToMerge.Count > 0)
         {
-            MergePops(nodesToMerge);
+            MergeNodes(nodesToMerge);
         }
     }
     
-    void MergePops(List<Node> nodesToMerge)
+    void MergeNodes(List<Node> nodesToMerge)
     {
         isMerged = true;
         
