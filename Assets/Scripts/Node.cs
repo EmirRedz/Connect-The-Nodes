@@ -15,6 +15,7 @@ public class Node : MonoBehaviour
     public int nodeValue;
     public bool isSelected ;
     public bool isMerged;
+    [SerializeField] private float mergeTime = 0.15f;
     private bool isDragging;
 
     private List<Node> connectedNodes = new List<Node>();
@@ -132,7 +133,7 @@ public class Node : MonoBehaviour
             return;
         }
         transform.DOKill(true);
-        transform.DOMove(transform.position + (Vector3)(Vector2.down * BoardManager.Instance.nodeOffset), 0.25f);
+        transform.DOMove(transform.position + (Vector3)(Vector2.down * BoardManager.Instance.nodeOffset), 0.05f);
 
     }
 
@@ -231,7 +232,7 @@ public class Node : MonoBehaviour
             }
 
             var index = i;
-            nodesToMerge[i].transform.DOMove(nodesToMerge[^1].transform.position, 0.75f).SetEase(Ease.Linear).OnComplete((() =>
+            nodesToMerge[i].transform.DOMove(nodesToMerge[^1].transform.position, mergeTime).SetEase(Ease.Linear).OnComplete((() =>
             {
                 LeanPool.Despawn(nodesToMerge[index].gameObject);
             }));
@@ -239,7 +240,7 @@ public class Node : MonoBehaviour
 
         }
 
-        transform.DOMove(nodesToMerge[^1].transform.position, 0.75f).SetEase(Ease.Linear);
+        transform.DOMove(nodesToMerge[^1].transform.position, mergeTime).SetEase(Ease.Linear);
 
         DOVirtual.DelayedCall(1f, () =>
         {
