@@ -15,11 +15,12 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private Node nodePrefab;
 
 
-    public float nodeOffset = 0.875f;
-    [SerializeField] private int rows = 5;
-    [SerializeField] private int columns = 5;
+    public float nodeOffset = 0.875f; 
+    public int rows = 5;
+    public int columns = 5;
 
-    [Space(5)] [SerializeField] private int firstTerm = 2;
+    [Space(5)] 
+    [SerializeField] private int firstTerm = 2;
     [SerializeField] private int commonRatio = 2;
     [SerializeField] private int maxNumberOfTerms;
     [SerializeField] private int numberOfTerms = 5;
@@ -108,7 +109,7 @@ public class BoardManager : MonoBehaviour
         {
             var node = SpawnNode(emptyPosition);
             node.transform.localScale = Vector3.zero;
-            node.transform.DOScale(nodePrefab.transform.localScale, 0.35f);
+            node.transform.DOScale(nodePrefab.transform.localScale, 0.06f);
         }
     }
     

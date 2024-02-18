@@ -127,7 +127,7 @@ public class Node : MonoBehaviour
     {
         Vector2 belowNeighborPosition = transform.position + ((Vector3)Vector2.down * BoardManager.Instance.nodeOffset);
         RaycastHit2D hit = Physics2D.Raycast(belowNeighborPosition, Vector2.zero);
-
+        
         if (hit.collider != null || transform.position.y <= 0)
         {
             return;
@@ -240,9 +240,7 @@ public class Node : MonoBehaviour
 
         }
 
-        transform.DOMove(nodesToMerge[^1].transform.position, mergeTime).SetEase(Ease.Linear);
-
-        DOVirtual.DelayedCall(1f, () =>
+        transform.DOMove(nodesToMerge[^1].transform.position, mergeTime).SetEase(Ease.Linear).OnComplete((() =>
         {
             LeanPool.Despawn(gameObject);
             
@@ -250,7 +248,6 @@ public class Node : MonoBehaviour
             
             nodesToMerge[^1].Init(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
             connectedNodes.Clear();
-
-        });
+        }));
     }
 }
