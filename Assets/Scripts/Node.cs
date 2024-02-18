@@ -218,7 +218,6 @@ public class Node : MonoBehaviour
     {
         isMerged = true;
         
-        BoardManager.Instance.activeNodes.Remove(nodesToMerge[^1]);
         BoardManager.Instance.activeNodes.Remove(this);
 
         for (var i = 0; i < nodesToMerge.Count; i++)
