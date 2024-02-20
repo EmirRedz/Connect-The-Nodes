@@ -223,6 +223,14 @@ public class Node : MonoBehaviour
     {
         int currentNodeValue = nodeValue * (connectedNodes.Count + 1);
 
+        if (currentNodeValue < connectValue)
+        {
+            var lowestGeometricNumber = BoardManager.Instance.GetClosestGeometricNumber(currentNodeValue);
+            connectValue = (int)lowestGeometricNumber;
+            GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
+
+            Debug.Log("Lowest geometric value for: " + currentNodeValue + "is: " + lowestGeometricNumber);
+        }
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
             connectValue = currentNodeValue;

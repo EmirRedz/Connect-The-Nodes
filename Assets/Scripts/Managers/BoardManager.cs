@@ -168,6 +168,26 @@ public class BoardManager : MonoBehaviour
         return false;
     }
 
+    public float GetClosestGeometricNumber(int targetValue)
+    {
+        float closestGeometricNumber = float.MinValue;
+
+        for (int i = 0; i < maxNumberOfTerms; i++)
+        {
+            float geometricNumber = CalculateGeometricNumber(i);
+
+            if (geometricNumber <= targetValue && geometricNumber > closestGeometricNumber)
+            {
+                // If the current geometric number is less than or equal to the target value and greater than the current closest, update the closest.
+                closestGeometricNumber = geometricNumber;
+                termIndex = i;
+            }
+        }
+
+        // Return the closest geometric number found.
+        return closestGeometricNumber;
+    }
+    
     public Color GetTermColorByTermIndex()
     {
         Debug.Log("Term Index: " + termIndex);
