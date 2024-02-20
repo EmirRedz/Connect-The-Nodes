@@ -56,15 +56,7 @@ public class GameManager : MonoBehaviour
         xpBar.SetValue(currentXP, targetXP);
         if (currentLevel >= maxLevel-1)
         {
-            currentLevel = maxLevel - 1;
-                
-            currentLevelData.levelText.SetText("Infinity");
-            currentLevelData.levelText.enableAutoSizing = true;
-            currentLevelData.levelImage.color = levelColors[currentLevel];
-        
-            nextLevelData.levelText.SetText(("Infinity").ToString());
-            nextLevelData.levelText.enableAutoSizing = true;
-            nextLevelData.levelImage.color = levelColors[currentLevel];
+            SetMaxLevelUI();
         }
         else
         {
@@ -103,22 +95,20 @@ public class GameManager : MonoBehaviour
         {
             currentLevel++;
             PlayerPrefs.SetInt(PlayerPrefsManager.CURRENT_LEVEL_KEY, currentLevel);
+            
+            currentLevelData.levelImage.transform.DOKill(true);
+            currentLevelData.levelImage.transform.DOPunchScale(Vector3.one * 0.25f, 0.35f);
+            
+            nextLevelData.levelImage.transform.DOKill(true);
+            nextLevelData.levelImage.transform.DOPunchScale(Vector3.one * 0.25f, 0.35f);
+            
             if (currentLevel >= maxLevel-1)
             {
-                currentLevel = maxLevel - 1;
-                
-                currentLevelData.levelText.SetText("Infinity");
-                currentLevelData.levelText.enableAutoSizing = true;
-                currentLevelData.levelImage.color = levelColors[currentLevel];
-        
-                nextLevelData.levelText.SetText(("Infinity").ToString());
-                nextLevelData.levelText.enableAutoSizing = true;
-                nextLevelData.levelImage.color = levelColors[currentLevel];
+                SetMaxLevelUI();
             }
             else
             {
                 SetLevelUI();
-                Debug.Log(currentLevel % 10);
                 if (currentLevel % 6 == 0)
                 {
                     OnLevelUp?.Invoke();
@@ -140,6 +130,20 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+    private void SetMaxLevelUI()
+    {
+        currentLevel = maxLevel - 1;
+        SetMaxLevelData(currentLevelData);
+        SetMaxLevelData(nextLevelData);
+    }
+
+    private void SetMaxLevelData(LevelData data)
+    {
+        data.levelText.SetText("Infinity");
+        data.levelText.enableAutoSizing = true;
+        data.levelImage.color = levelColors[currentLevel];
+    }
+
     private void SetLevelUI()
     {
         int levelToShow = currentLevel + 1;
@@ -148,6 +152,8 @@ public class GameManager : MonoBehaviour
         
         nextLevelData.levelText.SetText((levelToShow + 1).ToString());
         nextLevelData.levelImage.color = levelColors[currentLevel+1];
+
+        xpBar.imageFill.color = levelColors[currentLevel];
 
     }
 

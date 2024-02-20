@@ -72,6 +72,8 @@ public class Node : MonoBehaviour
         }
 
         #endregion
+        
+        Debug.Log(gameObject.name);
     }
 
     private void OnMouseDown()
@@ -228,13 +230,11 @@ public class Node : MonoBehaviour
             connectValue = (int)lowestGeometricNumber;
             GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
 
-            GameManager.Instance.AddXP(connectValue);
         }
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
             connectValue = currentNodeValue;
             GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
-            GameManager.Instance.AddXP(connectValue);
         }
     }
 
@@ -279,6 +279,8 @@ public class Node : MonoBehaviour
             
             nodesToMerge[^1].Init(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
             connectedNodes.Clear();
+            GameManager.Instance.AddXP(connectValue);
+
         }));
     }
 }
