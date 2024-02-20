@@ -39,11 +39,24 @@ public class BoardManager : MonoBehaviour
     {
         Instance = this;
         lr = GetComponent<LineRenderer>();
+
+        numberOfTerms = PlayerPrefs.GetInt(PlayerPrefsManager.CURRENT_NUMBER_OF_TERMS, 3);
     }
 
     private void Start()
     {
         GenerateNodes();
+    }
+
+    private void OnEnable()
+    {
+        GameManager.OnLevelUp += OnLevelUp;
+
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnLevelUp -= OnLevelUp;
     }
 
     private void GenerateNodes()
@@ -178,19 +191,15 @@ public class BoardManager : MonoBehaviour
 
             if (geometricNumber <= targetValue && geometricNumber > closestGeometricNumber)
             {
-                // If the current geometric number is less than or equal to the target value and greater than the current closest, update the closest.
                 closestGeometricNumber = geometricNumber;
                 termIndex = i;
             }
         }
-
-        // Return the closest geometric number found.
         return closestGeometricNumber;
     }
     
     public Color GetTermColorByTermIndex()
     {
-        Debug.Log("Term Index: " + termIndex);
         return nodeColors[termIndex];
     }
 
@@ -231,12 +240,20 @@ public class BoardManager : MonoBehaviour
 
         for (int i = 0; i < length; i++)
         {
-            // var pointPos = points[i].position;
-            // pointPos.z = 0.5f;
-            // points[i].position = pointPos;
-
             lr.SetPosition(i, points[i].position);
         }
+    }
+
+    private void OnLevelUp()
+    {
+        numberOfTerms++;
+        if (numberOfTerms > maxNumberOfTerms)
+        {
+            numberOfTerms = maxNumberOfTerms;
+        }
+
+        PlayerPrefs.SetInt(PlayerPrefsManager.CURRENT_NUMBER_OF_TERMS, numberOfTerms);
+        PlayerPrefs.Save();
     }
 
     [Button]

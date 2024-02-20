@@ -39,6 +39,7 @@ public class Node : MonoBehaviour
         isMerged = false;
         isSelected = false;
         currentConnectedNode = null;
+        connectValue = 0;
         
         nodeValue = value;
         numberText.SetText(nodeValue.ToString());
@@ -130,9 +131,7 @@ public class Node : MonoBehaviour
         if (hit.collider != null)
         {
             Node targetNode = hit.collider.GetComponent<Node>();
-
-            Debug.Log("Target node: " + targetNode);
-           
+            
             if (targetNode != null && IsTargetNodeNeighbor(targetNode))
             {
                 if (targetNode == this)
@@ -229,14 +228,14 @@ public class Node : MonoBehaviour
             connectValue = (int)lowestGeometricNumber;
             GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
 
-            Debug.Log("Lowest geometric value for: " + currentNodeValue + "is: " + lowestGeometricNumber);
+            GameManager.Instance.AddXP(connectValue);
         }
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
             connectValue = currentNodeValue;
             GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
+            GameManager.Instance.AddXP(connectValue);
         }
-        Debug.Log("Current node value: " + currentNodeValue + " || Current saved value: " + connectValue);
     }
 
     void CheckForMerge(List<Node> nodesToMerge)
