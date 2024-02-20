@@ -8,7 +8,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-
+    public Camera mainCamera;
+    
     [Header("Current Bonus Visual")]
     [SerializeField] private SpriteRenderer currentBonusSr;
     [SerializeField] private TMP_Text currentBonusText;

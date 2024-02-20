@@ -744,6 +744,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c6c2f739b1fc404baa9f2482288a962, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainCamera: {fileID: 1426632036}
   currentBonusSr: {fileID: 6210675503924530781}
   currentBonusText: {fileID: 1382132236285584418}
   bonusTweenTime: 0.05

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using Lean.Pool;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -152,7 +153,7 @@ public class BoardManager : MonoBehaviour
 
         return emptyPositions;
     }
-
+    
     public bool IsCurrentValueEqualToGeometricNumber(int currentValue)
     {
         for (int i = 0; i < maxNumberOfTerms; i++)
@@ -194,6 +195,14 @@ public class BoardManager : MonoBehaviour
         points.Clear();
         lr.positionCount = 0;
     }
+    public void UnselectLineRendererUpdate()
+    {
+        var positionCount = lr.positionCount;
+        positionCount--;
+        lr.positionCount = positionCount;
+        points.SetLength(positionCount);
+    }
+
 
     private void SetUpLine()
     {

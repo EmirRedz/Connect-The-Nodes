@@ -123,34 +123,43 @@ public class Node : MonoBehaviour
         isSelected = false;
     }
 
-    public void CheckIfGridBelowIsEmpty()
-    {
-        Vector2 belowNeighborPosition = transform.position + ((Vector3)Vector2.down * BoardManager.Instance.nodeOffset);
-        RaycastHit2D hit = Physics2D.Raycast(belowNeighborPosition, Vector2.zero);
-        
-        if (hit.collider != null || transform.position.y <= 0)
-        {
-            return;
-        }
-        transform.DOKill(true);
-        transform.DOMove(transform.position + (Vector3)(Vector2.down * BoardManager.Instance.nodeOffset), 0.05f);
-
-    }
-
     private void OnContinueDrag()
     {
-        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        RaycastHit2D hit = Physics2D.Raycast(GameManager.Instance.mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
         if (hit.collider != null)
         {
             Node targetNode = hit.collider.GetComponent<Node>();
 
-            if (targetNode != null && !targetNode.isSelected && targetNode.nodeValue == nodeValue && IsTargetNodeNeighbor(targetNode))
+            Debug.Log("Target node: " + targetNode);
+           
+            if (targetNode != null && IsTargetNodeNeighbor(targetNode))
             {
-                AddNodeToList(targetNode);
-                targetNode.SelectNode();
-                currentConnectedNode = targetNode;
-                BoardManager.Instance.GenerateLine(targetNode.transform,gradient);
+                if (targetNode == this)
+                {
+                    currentConnectedNode = this;
+                    connectedNodes[0].UnselectNode();
+                    RemoveNodeFromList(connectedNodes[0]);
+                    BoardManager.Instance.UnselectLineRendererUpdate();
+
+                }
+                else if (connectedNodes.Contains(targetNode) && connectedNodes.IndexOf(targetNode) != connectedNodes.Count - 1)
+                {
+                    var nodeToRemove = connectedNodes[connectedNodes.IndexOf(targetNode) + 1];
+                    currentConnectedNode = targetNode;
+                    RemoveNodeFromList(nodeToRemove);
+                    nodeToRemove.UnselectNode();
+                    BoardManager.Instance.UnselectLineRendererUpdate();
+                    
+                }
+                else if (!targetNode.isSelected && targetNode.nodeValue == nodeValue)
+                {
+                    AddNodeToList(targetNode);
+                    targetNode.SelectNode();
+                    currentConnectedNode = targetNode;
+                    BoardManager.Instance.GenerateLine(targetNode.transform,gradient);
+                }
+               
             }
             
         }
@@ -196,15 +205,30 @@ public class Node : MonoBehaviour
         }
 
         connectedNodes.Add(targetNode);
-        
+        SetCurrentBonusAmount();
+    }
+    
+    private void RemoveNodeFromList(Node targetNode)
+    {
+        if (!connectedNodes.Contains(targetNode))
+        {
+            return;
+        }
+
+        connectedNodes.Remove(targetNode);
+        SetCurrentBonusAmount();
+    }
+    
+    private void SetCurrentBonusAmount()
+    {
         int currentNodeValue = nodeValue * (connectedNodes.Count + 1);
-        
-        Debug.Log("Current node value:"  + currentNodeValue);
+
         if (BoardManager.Instance.IsCurrentValueEqualToGeometricNumber(currentNodeValue))
         {
             connectValue = currentNodeValue;
             GameManager.Instance.SetCurrentBonusText(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
         }
+        Debug.Log("Current node value: " + currentNodeValue + " || Current saved value: " + connectValue);
     }
 
     void CheckForMerge(List<Node> nodesToMerge)
