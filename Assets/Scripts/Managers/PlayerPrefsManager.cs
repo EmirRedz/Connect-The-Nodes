@@ -9,4 +9,6 @@ public class PlayerPrefsManager
     public const string CURRENT_LEVEL_TARGET_XP = "TargetXP";
 
     public const string CURRENT_NUMBER_OF_TERMS = "NumberOfTerms";
+
+    public const string TERM_INDEX = "TermIndex";
 }

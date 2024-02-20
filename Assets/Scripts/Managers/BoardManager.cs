@@ -8,6 +8,13 @@ using Sirenix.Utilities;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+
+public class EmptySpotData
+{
+    public Vector2 position;
+    public int row;
+    public int col;
+}
 public class BoardManager : MonoBehaviour
 {
     public static BoardManager Instance;
@@ -67,22 +74,34 @@ public class BoardManager : MonoBehaviour
             {
                 Vector2 position = new Vector2(i * nodeOffset, j * nodeOffset);
 
-                var node = SpawnNode(position);
-
-                node.name = "Node " + i + "," + j;
+                var node = SpawnNode(position, i, j,true);
             }
         }
     }
 
-    private Node SpawnNode(Vector2 position)
+    private Node SpawnNode(Vector2 position, int i, int j, bool isFirstSpawn = false)
     {
         var node = LeanPool.Spawn(nodePrefab, nodeContainer);
+        node.name = "Node " + i + "," + j;
+
         node.transform.localPosition = position;
 
-        int randomTermIndex = Random.Range(0, numberOfTerms);
-        //int randomTermIndex = Random.Range(numberOfTerms,maxNumberOfTerms);
-        int geomatricNumber = Mathf.RoundToInt(CalculateGeometricNumber(randomTermIndex));
-        node.Init(geomatricNumber, nodeColors[randomTermIndex]);
+        node.termIndex = PlayerPrefs.GetInt(PlayerPrefsManager.TERM_INDEX + node.name,-1);
+
+        int nodeTermIndex = 0;
+        if (isFirstSpawn)
+        {
+            nodeTermIndex = node.termIndex < 0 ? Random.Range(0, numberOfTerms) : node.termIndex;
+        }
+        else
+        {
+            nodeTermIndex = Random.Range(0, numberOfTerms);
+        }
+        
+        int nodeValue = Mathf.RoundToInt(CalculateGeometricNumber(nodeTermIndex));
+            
+        node.Init(nodeValue, nodeTermIndex,nodeColors[nodeTermIndex]);
+        node.termIndex = nodeTermIndex;
         activeNodes.Add(node);
         return node;
     }
@@ -93,6 +112,12 @@ public class BoardManager : MonoBehaviour
         return result;
     }
 
+    public int CalculateIndexFromResult(float result)
+    {
+        float index = Mathf.Log(result / firstTerm) / Mathf.Log(commonRatio);
+        return Mathf.RoundToInt(index);
+    }
+    
     [Button]
     public void MoveNodesDown()
     {
@@ -104,11 +129,12 @@ public class BoardManager : MonoBehaviour
         return activeNodes.Find(nodeTransform => Mathf.RoundToInt(nodeTransform.transform.position.y / nodeOffset) == row && Mathf.RoundToInt(nodeTransform.transform.position.x / nodeOffset) == col);
     }
     
-    private void MoveNode(Node node, int newRow, int col)
+    private void MoveNode(Node node, int col, int row)
     {
-        Vector3 newPosition = new Vector3(col * nodeOffset, newRow * nodeOffset, 0);
+        Vector3 newPosition = new Vector3(row * nodeOffset, col * nodeOffset, 0);
         
         node.transform.DOMove(newPosition, 0.05f).SetEase(Ease.Linear);
+        node.name = "Node " + row + "," + col;
     }
 
     private IEnumerator MoveNodesDownCO()
@@ -134,21 +160,25 @@ public class BoardManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         
-        var emptyPositions = FindEmptyPositions();
-        emptyPositions.Sort((v1, v2) => v1.y.CompareTo(v2.y));
+        var emptySpots = FindEmptyPositions();
+        emptySpots.Sort((v1, v2) => v1.position.y.CompareTo(v2.position.y));
         
-        foreach (Vector2 emptyPosition in emptyPositions)
+        foreach (EmptySpotData emptySpot in emptySpots)
         {
-            var node = SpawnNode(emptyPosition);
+            var node = SpawnNode(emptySpot.position, emptySpot.row, emptySpot.col);
             node.transform.localScale = Vector3.zero;
             node.transform.DOScale(nodePrefab.transform.localScale, 0.06f);
         }
-        
+
+        foreach (Node node in activeNodes)
+        {
+            node.SaveValue();
+        }
     }
     
-    private List<Vector2> FindEmptyPositions()
+    private List<EmptySpotData> FindEmptyPositions()
     {
-        List<Vector2> emptyPositions = new List<Vector2>();
+        List<EmptySpotData> emptyPositions = new List<EmptySpotData>();
 
         for (int i = 0; i < rows; i++)
         {
@@ -159,7 +189,11 @@ public class BoardManager : MonoBehaviour
                 var colliders = Physics2D.OverlapCircleAll(position, 0.35f);
                 if (colliders.Length <= 0)
                 {
-                    emptyPositions.Add(position);
+                    EmptySpotData data = new EmptySpotData();
+                    data.position = position;
+                    data.row = i;
+                    data.col = j;
+                    emptyPositions.Add(data);
                 }
             }
         }

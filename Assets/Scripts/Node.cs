@@ -13,6 +13,8 @@ public class Node : MonoBehaviour
     [SerializeField] private TMP_Text numberText;
     [SerializeField] private SpriteRenderer sr;
     public int nodeValue;
+    public int termIndex;
+    
     public bool isSelected ;
     public bool isMerged;
     [SerializeField] private float mergeTime = 0.15f;
@@ -33,14 +35,15 @@ public class Node : MonoBehaviour
     private GradientColorKey[] colorKeys;
     private GradientAlphaKey[] alphaKeys;
     #endregion
-    public void Init(int value, Color colorToSet)
+
+    public void Init(int value, int index, Color colorToSet)
     {
         isDragging = false;
         isMerged = false;
         isSelected = false;
         currentConnectedNode = null;
         connectValue = 0;
-        
+        termIndex = index;
         nodeValue = value;
         numberText.SetText(nodeValue.ToString());
         normalScale = transform.localScale;
@@ -72,8 +75,6 @@ public class Node : MonoBehaviour
         }
 
         #endregion
-        
-        Debug.Log(gameObject.name);
     }
 
     private void OnMouseDown()
@@ -277,10 +278,16 @@ public class Node : MonoBehaviour
             
             BoardManager.Instance.MoveNodesDown();
             
-            nodesToMerge[^1].Init(connectValue, BoardManager.Instance.GetTermColorByTermIndex());
+            nodesToMerge[^1].Init(connectValue, BoardManager.Instance.CalculateIndexFromResult(connectValue), BoardManager.Instance.GetTermColorByTermIndex());
             connectedNodes.Clear();
             GameManager.Instance.AddXP(connectValue);
 
         }));
+    }
+
+    public void SaveValue()
+    {
+        PlayerPrefs.SetInt(PlayerPrefsManager.TERM_INDEX + gameObject.name, termIndex);
+        PlayerPrefs.Save();
     }
 }

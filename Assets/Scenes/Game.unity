@@ -1751,6 +1751,7 @@ MonoBehaviour:
   numberText: {fileID: 1382132236285584418}
   sr: {fileID: 6210675503924530781}
   nodeValue: 0
+  termIndex: 0
   isSelected: 0
   isMerged: 0
   mergeTime: 0.15
