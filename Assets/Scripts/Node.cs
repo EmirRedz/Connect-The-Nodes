@@ -45,7 +45,16 @@ public class Node : MonoBehaviour
         connectValue = 0;
         termIndex = index;
         nodeValue = value;
-        numberText.SetText(nodeValue.ToString());
+        if (nodeValue >= 1000)
+        {
+            string nodeValueK = (nodeValue / 1000) + "K";
+            numberText.SetText(nodeValueK);
+
+        }
+        else
+        {
+            numberText.SetText(nodeValue.ToString());
+        }
         normalScale = transform.localScale;
         selectedScale = transform.localScale * 1.2f;
 
