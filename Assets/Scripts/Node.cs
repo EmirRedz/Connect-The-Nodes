@@ -108,6 +108,7 @@ public class Node : MonoBehaviour
         transform.DOKill(true);
         transform.DOScale(selectedScale, 0.25f).SetEase(Ease.Linear);
         isSelected = true;
+        AudioManager.Instance.PlaySound2D("SelectNode");
     }
 
     private void StopDrag()
@@ -125,6 +126,10 @@ public class Node : MonoBehaviour
         transform.DOKill(true);
         transform.DOScale(normalScale, 0.25f);
         isSelected = false;
+        if (!isMerged)
+        {
+            AudioManager.Instance.PlaySound2D("UnselectNode");
+        }
     }
 
     private void OnContinueDrag()

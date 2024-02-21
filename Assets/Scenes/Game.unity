@@ -320,7 +320,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56f7c63efe0693e45a93ab9a7d9cad60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundGroups: []
+  soundGroups:
+  - groupName: SelectNode
+    groupClips:
+    - {fileID: 8300000, guid: 5e39efd721e7a464a9ee19056c0e6048, type: 3}
+  - groupName: UnselectNode
+    groupClips:
+    - {fileID: 8300000, guid: 82f815fd98c4bb548955a50bd6f127d2, type: 3}
 --- !u!114 &335683248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1737,6 +1743,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 1426632036}
+  vcam: {fileID: 1874308146}
+  aspectRatio: {x: 9, y: 16}
+  targetOrthoSize: 5
   currentBonusSr: {fileID: 6210675503924530781}
   currentBonusText: {fileID: 1382132236285584418}
   bonusTweenTime: 0.05

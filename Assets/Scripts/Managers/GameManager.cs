@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cinemachine;
 using DG.Tweening;
 using Sirenix.OdinInspector;
 using TMPro;
@@ -19,6 +20,11 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public Camera mainCamera;
+    public CinemachineVirtualCamera vcam;
+    
+    [Header("Camera Adjuster")] 
+    [SerializeField] private Vector2 aspectRatio;
+    [SerializeField] private float targetOrthoSize;
     
     [Header("Current Bonus Visual")]
     [SerializeField] private SpriteRenderer currentBonusSr;
@@ -50,6 +56,7 @@ public class GameManager : MonoBehaviour
     
     private void Start()
     {
+        SetCameraOrthographicSize();
         SetCurrentBonusText(0, Color.clear);
         
         xpBar.SetMaxValue(targetXP);
@@ -157,6 +164,19 @@ public class GameManager : MonoBehaviour
 
     }
 
+    private void SetCameraOrthographicSize()
+    {
+        float screenWidth = Screen.width;
+        float screenHeight = Screen.height;
+
+        float targetAspectRatio = aspectRatio.x / aspectRatio.y; 
+
+        float currentAspectRatio = screenWidth / screenHeight;
+        float scaleFactor = targetAspectRatio / currentAspectRatio;
+        float orthographicSize = targetOrthoSize * scaleFactor;
+
+        vcam.m_Lens.OrthographicSize = orthographicSize;
+    }
     [Button]
     private void SetLevelColors()
     {
